@@ -1,15 +1,23 @@
 [project]
-name = "ejemplo-taller-ii"
+name = "taller-ii-boilerplate"
 version = "0.1.0"
-description = "Un ejemplo en vivo de Poetry y Gi"
+description = "Pipeline de extracción y preprocesamiento de reseñas para análisis de sentimiento"
 authors = [
-    {name = "amartinezsaucedo",email = "anmartinez@uade.edu.ar"}
+    {name = "Alvaro Ybañez"}
 ]
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "requests (>=2.32.0,<3.0.0)",
+    "pandas (>=2.2.0,<4.0.0)",
+    "tqdm (>=4.66.0,<5.0.0)",
+    "nltk (>=3.9.0,<4.0.0)",
+    "beautifulsoup4 (>=4.12.0,<5.0.0)",
+    "scikit-learn (>=1.5.0,<2.0.0)"
 ]
 
+[tool.poetry]
+package-mode = false
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

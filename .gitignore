@@ -1,0 +1,33 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# OS and IDE files
+.DS_Store
+.AppleDouble
+.LSOverride
+.vscode/
+.idea/
+
+# Datasets pesados (omitir CSVs de control de versiones)
+*.csv
+*.tsv
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Modelos y checkpoints futuros
+models/*
+!models/.gitkeep
+*.pkl
+*.joblib
+*.pt
+*.pth
