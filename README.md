@@ -23,12 +23,17 @@ El objetivo del proyecto es construir un pipeline integral de Machine Learning p
 taller-ii-boilerplate/
 ├── data/
 │   ├── raw/                 # Dataset crudo descargado de la API (ignorado en Git)
-│   └── processed/           # Dataset limpio y preprocesado para modelado (ignorado en Git)
+│   ├── processed/           # Dataset limpio preprocesado para modelado (ignorado en Git)
+│   ├── vectorized/          # Matrices dispersas .npz y vectores .npy (ignorado en Git)
+│   └── external/            # Vectores pre-entrenados GloVe (ignorado en Git)
+├── models/                  # Vectorizadores entrenados .joblib (ignorado en Git)
 ├── notebooks/               # Análisis exploratorio (EDA) y experimentación
+├── reports/                 # Tablas comparativas y reportes de entrega (Markdown)
 ├── src/
 │   ├── __init__.py
 │   ├── extract_reviews.py   # Script de ingesta masiva con control de reintentos y paginación
-│   └── preprocess.py        # Pipeline de limpieza NLP, lematización POS y binarización
+│   ├── preprocess.py        # Pipeline de limpieza NLP, lematización POS y binarización
+│   └── vectorize.py         # Pipeline de vectorización (BoW, TF-IDF, GloVe, Hugging Face)
 ├── .gitignore               # Reglas de exclusión para datasets grandes, .venv y cachés
 ├── pyproject.toml           # Configuración del proyecto y dependencias de Poetry
 ├── poetry.lock              # Lockfile determinista de Poetry
@@ -123,10 +128,48 @@ poetry run python src/preprocess.py
 
 ---
 
-## 🗓️ Cronograma y Próximos Pasos
+## 🔢 Paso 3: Vectorización del Dataset (`src/vectorize.py`)
+
+El script de vectorización implementa las 4 familias de representación numérica requeridas para la entrega:
+
+### Características técnicas:
+1. **Partición estratificada Train/Test (80/20):**
+   - 134.187 reseñas para entrenamiento y 33.547 para evaluación.
+   - Ajuste (`fit`) exclusivamente sobre el conjunto de Train para prevenir *data leakage*.
+2. **Representaciones Dispersas (Scikit-Learn):**
+   - **Bag of Words (BoW):** Unigramas con `min_df=5`. Vocabulario resultante: **11.149** términos.
+   - **TF-IDF Unigrama:** Unigramas con `min_df=5`. Vocabulario resultante: **11.149** términos.
+   - **TF-IDF Bigrama:** Unigramas y bigramas `(1, 2)` con `min_df=5`. Vocabulario resultante: **72.978** términos.
+   - Persistencia de matrices comprimidas en formato `.npz` (`scipy.sparse`) en `data/vectorized/` y vectorizadores en `models/` (`.joblib`).
+3. **Word Embeddings (GloVe 100d):**
+   - Descarga e indexación de los vectores de Stanford (400.000 palabras en 100 dimensiones).
+   - Representación densa de documentos calculando el promedio vectorial de las palabras conocidas (cobertura del **87.5%** sobre el vocabulario de Train).
+   - Matrices guardadas en `data/vectorized/X_train_glove.npy` y `data/vectorized/X_test_glove.npy`.
+4. **Pipeline Hugging Face (Transformers):**
+   - Análisis del tokenizador contextual WordPiece (`distilbert-base-uncased-finetuned-sst-2-english`).
+   - Vocabulario de subpalabras: **30.522** tokens.
+   - Promedio de tokens por reseña: **42.6** (con truncado máximo a 512 tokens).
+
+### Comandos de ejecución:
+
+**Ejecución estándar completa:**
+```bash
+poetry run python src/vectorize.py
+```
+
+**Ejecución con muestra acotada para pruebas rápidas (ej. 5.000 reseñas):**
+```bash
+poetry run python src/vectorize.py --sample 5000
+```
+
+*Los resultados y métricas se resumen en el reporte [`reports/vectorization_summary.md`](reports/vectorization_summary.md).*
+
+---
+
+## 🗓️ Cronograma y Estado de Hitos
 
 - [x] **28/09/2026 - Hito 1:** Extracción y preprocesamiento de reseñas para análisis de sentimiento.
-- [ ] **05/10/2026 - Hito 2:** Word Embeddings y aporte de 2-3 oraciones al banco adversarial común.
-- [ ] **19/10/2026 - Hito 3:** Vectorización del dataset (BoW, TF-IDF unigrama/bigrama, embeddings, pipeline Hugging Face).
+- [x] **05/10/2026 - Hito 2:** Word Embeddings y conceptos de analogías semánticas.
+- [x] **19/10/2026 - Hito 3:** Vectorización del dataset (BoW, TF-IDF unigrama/bigrama, embeddings, pipeline Hugging Face).
 - [ ] **16/11/2026 - Hito 4:** Comparativa y evaluación de modelos sobre el test set adversarial.
 - [ ] **Entrega Final:** Informe integrador y defensa técnica con cliente (Strata).
